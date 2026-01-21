@@ -1,0 +1,6 @@
+resume_env/
+__pycache__/
+*.pyc
+.env
+.git
+.gitignore
