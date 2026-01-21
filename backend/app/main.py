@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from backend.app.utils.text_cleaning import clean_text
 from backend.app.services.section_parser import extract_sections
 from backend.app.services.skill_extractor import extract_skills
+from backend.app.services.skill_gap_analyzer import analyze_skill_gap
 
 
 
@@ -53,3 +54,24 @@ def upload_resume(file: UploadFile = File(...)):
     }
 
 
+class ATSMatchRequest(BaseModel):
+    resume_text: str
+    job_description: str
+
+
+
+@app.post("/ats-match")
+def ats_match(request: ATSMatchRequest):
+    resume_skills = extract_skills({}, request.resume_text)
+    jd_skills = extract_skills({}, request.job_description)
+
+    analysis = analyze_skill_gap(
+        resume_skills=resume_skills,
+        jd_skills=jd_skills
+    )
+
+    return {
+        "resume_skills": resume_skills,
+        "job_description_skills": jd_skills,
+        "analysis": analysis
+    }
