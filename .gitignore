@@ -1,7 +1,7 @@
 resume_env/
 .vscode/
 __pycache__/
-
+.DS_Store
 bin/
 lib/
 
