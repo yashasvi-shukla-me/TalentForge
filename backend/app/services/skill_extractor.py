@@ -1,6 +1,8 @@
 import re
 from typing import Dict, List, Set
 
+from app.services.dynamic_skill_expander import extract_dynamic_skills
+
 
 SKILL_VOCABULARY: Dict[str, List[str]] = {
     "programming_languages": [
@@ -41,37 +43,43 @@ SKILL_VOCABULARY: Dict[str, List[str]] = {
 
 
 def normalize_text(text: str) -> str:
-    
-    # Normalize text for skill matching.
-    
     return text.lower()
 
 
 def extract_skills(
     sections: Dict[str, str],
-    full_text: str
-    ) -> Dict[str, List[str]]:
+    full_text: str,
+    mode: str = "resume"
+) -> Dict[str, Dict[str, Dict]]:
     
-    # Extract skills from resume sections using a rule-based approach.
-    
+    extracted: Dict[str, Dict[str, Dict]] = {}
 
-    extracted: Dict[str, Set[str]] = {}
-
-    # Prefer Skills section if available
     search_text = sections.get("skills", full_text)
     normalized_text = normalize_text(search_text)
 
     for category, skills in SKILL_VOCABULARY.items():
-        extracted[category] = set()
+        extracted[category] = {}
 
         for skill in skills:
             pattern = r"\b" + re.escape(skill) + r"\b"
-            if re.search(pattern, normalized_text):
-                extracted[category].add(skill)
+            matches = re.findall(pattern, normalized_text)
 
-    # Convert sets to sorted lists
-    return {
-        category: sorted(list(skill_set))
-        for category, skill_set in extracted.items()
-        if skill_set
-    }
+            if matches:
+                frequency = len(matches)
+
+                if frequency >= 5:
+                    strength = "strong"
+                elif frequency >= 2:
+                    strength = "moderate"
+                else:
+                    strength = "weak"
+
+                extracted[category][skill] = {
+                    "frequency": frequency,
+                    "strength": strength
+                }
+
+        if not extracted[category]:
+            extracted.pop(category)
+
+    return extracted
