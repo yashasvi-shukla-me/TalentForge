@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { atsMatch, uploadResume } from "./api/atsApi";
 
+import ScoreCards from "./components/ScoreCards";
+import SkillMatrix from "./components/SkillMatrix";
+import CategoryStrength from "./components/CategoryStrength";
+import SimulationPanel from "./components/SimulationPanel";
+import SeniorityPanel from "./components/SeniorityPanel";
+import LoadingOverlay from "./components/LoadingOverlay";
+
 function App() {
   const [resumeText, setResumeText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
@@ -12,13 +19,12 @@ function App() {
 
   async function handleAnalyze() {
     if (!resumeText || !jobDescription) {
-      setError("Please upload a resume and provide a job description.");
+      setError("Please upload resume and paste job description.");
       return;
     }
 
     setLoading(true);
     setError(null);
-    setResult(null);
 
     try {
       const data = await atsMatch({
@@ -26,9 +32,10 @@ function App() {
         jobDescription,
         jobRole,
       });
+
       setResult(data);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || "Analysis failed.");
     } finally {
       setLoading(false);
     }
@@ -36,50 +43,50 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-slate-100 font-mono">
-      <div className="max-w-6xl mx-auto p-8 space-y-10">
+      {loading && <LoadingOverlay />}
+
+      <div className="max-w-7xl mx-auto p-8 space-y-12">
         {/* HEADER */}
-        <div className="border border-blue-500/30 rounded-lg bg-gray-900 p-6 shadow-lg">
-          <h1 className="text-3xl text-blue-400 tracking-widest">
-            TALENTFORGE SYSTEM
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold text-blue-400 tracking-wider">
+            TALENTFORGE AI
           </h1>
-          <p className="text-sm text-slate-400 mt-2">
-            AI Resume Intelligence · ATS Scoring Engine · Role Aware Matching
+          <p className="text-slate-400">
+            Resume Intelligence · Skill Gap Engine · Shortlist Prediction
           </p>
         </div>
 
-        {/* INPUT GRID */}
+        {/* INPUTS */}
         <div className="grid md:grid-cols-2 gap-8">
-          {/* LEFT */}
-          <div className="border border-gray-700 rounded-lg bg-gray-900 p-6 space-y-5">
+          <div className="bg-gray-900 p-6 rounded-xl border border-gray-700 space-y-4">
             <p className="text-blue-400 text-xs tracking-widest">
               MODULE 01 - RESUME INPUT
             </p>
 
-            <label className="flex justify-between items-center border border-gray-600 bg-gray-800 rounded px-4 py-3 cursor-pointer hover:border-blue-500">
-              <span className="text-sm text-slate-300">
-                Upload Resume (.pdf)
-              </span>
-              <span className="text-blue-400 text-xs">BROWSE</span>
+            <label className="flex justify-between items-center border border-gray-600 bg-gray-800 rounded px-4 py-3 cursor-pointer hover:border-blue-500 transition">
+              <span>Upload Resume (.pdf)</span>
 
               <input
                 type="file"
                 accept=".pdf"
                 className="hidden"
                 onChange={async (e) => {
-                  const file = e.target.files[0];
+                  const file = e.target.files?.[0];
                   if (!file) return;
 
                   try {
                     setLoading(true);
                     const data = await uploadResume(file);
 
-                    const extractedText = Object.values(data.extracted_skills)
-                      .flat()
+                    const extractedText = Object.values(
+                      data?.extracted_skills || {},
+                    )
+                      .flatMap((category) => Object.keys(category))
                       .join(" ");
 
                     setResumeText(extractedText);
                   } catch (err) {
-                    setError(err.message);
+                    setError("Resume upload failed.");
                   } finally {
                     setLoading(false);
                   }
@@ -94,21 +101,20 @@ function App() {
             )}
           </div>
 
-          {/* RIGHT */}
-          <div className="border border-gray-700 rounded-lg bg-gray-900 p-6 space-y-5">
+          <div className="bg-gray-900 p-6 rounded-xl border border-gray-700 space-y-4">
             <p className="text-blue-400 text-xs tracking-widest">
               MODULE 02 - JOB SPECIFICATION
             </p>
 
             <textarea
-              className="w-full h-40 bg-gray-800 border border-gray-600 rounded p-3 text-sm focus:outline-none focus:border-blue-500"
+              className="w-full h-40 bg-gray-800 border border-gray-600 rounded p-3 focus:outline-none focus:border-blue-500 transition"
               placeholder="Paste job description..."
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
             />
 
             <select
-              className="w-full bg-gray-800 border border-gray-600 rounded p-2 focus:outline-none focus:border-blue-500"
+              className="w-full bg-gray-800 border border-gray-600 rounded p-2 focus:outline-none focus:border-blue-500 transition"
               value={jobRole}
               onChange={(e) => setJobRole(e.target.value)}
             >
@@ -124,70 +130,22 @@ function App() {
           <button
             onClick={handleAnalyze}
             disabled={loading}
-            className="px-10 py-3 border border-blue-500 text-blue-400 rounded hover:bg-blue-500/10 disabled:opacity-40"
+            className="px-10 py-3 border border-blue-500 text-blue-400 rounded hover:bg-blue-500/10 transition disabled:opacity-50"
           >
-            {loading ? "PROCESSING..." : "RUN ANALYSIS"}
+            {loading ? "Processing..." : "Run AI Analysis"}
           </button>
         </div>
 
         {error && <p className="text-red-400 text-center">{error}</p>}
 
         {/* RESULTS */}
-        {result && (
-          <div className="border border-gray-700 rounded-lg bg-gray-900 p-8 space-y-8">
-            <p className="text-blue-400 text-xs tracking-widest">
-              ANALYSIS OUTPUT
-            </p>
-
-            <div className="text-center">
-              <p className="text-xs text-slate-400">ATS SCORE</p>
-              <p className="text-6xl text-blue-400 font-bold">
-                {result.analysis.ats_score}%
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <p className="text-green-400 mb-2">Matched Skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {Object.values(result.analysis.matched_skills)
-                    .flat()
-                    .map((s, i) => (
-                      <span
-                        key={i}
-                        className="text-xs px-2 py-1 border border-green-600 rounded text-green-400"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-red-400 mb-2">Missing Skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {Object.values(result.analysis.missing_skills)
-                    .flat()
-                    .map((s, i) => (
-                      <span
-                        key={i}
-                        className="text-xs px-2 py-1 border border-red-600 rounded text-red-400"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="border border-gray-700 rounded bg-gray-800 p-4">
-              <p className="text-slate-400 text-xs mb-2">System Feedback</p>
-              <ul className="space-y-1 text-sm">
-                {result.feedback.map((f, i) => (
-                  <li key={i}>• {f}</li>
-                ))}
-              </ul>
-            </div>
+        {result?.analysis && (
+          <div className="space-y-10 animate-fadeIn">
+            <ScoreCards result={result} />
+            <SkillMatrix result={result} />
+            <CategoryStrength result={result} />
+            <SimulationPanel result={result} />
+            <SeniorityPanel result={result} />
           </div>
         )}
       </div>
