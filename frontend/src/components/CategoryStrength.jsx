@@ -25,7 +25,7 @@ function CategoryStrength({ result }) {
 
               <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
                 <div
-                  className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500"
+                  className="h-3 rounded-full bg-linear-to-r from-blue-500 to-cyan-400 transition-all duration-500"
                   style={{ width: `${value}%` }}
                 />
               </div>

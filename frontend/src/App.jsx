@@ -157,7 +157,7 @@ function App() {
           <button
             onClick={handleAnalyze}
             disabled={loading}
-            className={`px-12 py-4 rounded-2xl bg-gradient-to-r 
+            className={`px-12 py-4 rounded-2xl bg-linear-to-r 
       from-blue-500 to-cyan-400 
       font-semibold text-lg text-white
       shadow-lg shadow-blue-500/20
