@@ -1,7 +1,7 @@
 import re
 from typing import Dict, List, Set
 
-from app.services.dynamic_skill_expander import extract_dynamic_skills
+from backend.app.services.dynamic_skill_expander import extract_dynamic_skills
 
 
 SKILL_VOCABULARY: Dict[str, List[str]] = {

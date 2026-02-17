@@ -4,7 +4,7 @@ from typing import Dict, List, Set
 ENABLE_SEMANTIC_MATCHING = False
 
 if ENABLE_SEMANTIC_MATCHING:
-    from app.services.semantic_matcher import SemanticMatcher
+    from backend.app.services.semantic_matcher import SemanticMatcher
 
 
 ROLE_BASED_WEIGHTS = {

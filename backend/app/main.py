@@ -7,21 +7,21 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 # self defined modules
-from app.utils.text_cleaning import clean_text
-from app.services.section_parser import extract_sections
-from app.services.skill_extractor import extract_skills
-from app.services.skill_gap_analyzer import analyze_skill_gap
-from app.services.feedback_generator import generate_feedback
-from app.services.document_similarity import compute_document_similarity
-from app.services.role_inference import infer_job_role
-from app.services.experience_analyzer import (
+from backend.app.utils.text_cleaning import clean_text
+from backend.app.services.section_parser import extract_sections
+from backend.app.services.skill_extractor import extract_skills
+from backend.app.services.skill_gap_analyzer import analyze_skill_gap
+from backend.app.services.feedback_generator import generate_feedback
+from backend.app.services.document_similarity import compute_document_similarity
+from backend.app.services.role_inference import infer_job_role
+from backend.app.services.experience_analyzer import (
     classify_seniority,
     estimate_resume_seniority,
     extract_required_experience,
     extract_resume_experience
 )
-from app.services.shortlist_predictor import predict_shortlist_probability
-from app.services.shortlist_predictor import predict_shortlist_probability
+from backend.app.services.shortlist_predictor import predict_shortlist_probability
+from backend.app.services.shortlist_predictor import predict_shortlist_probability
 
 
 class ResumeRequest(BaseModel):
@@ -46,6 +46,15 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"message": "AI Resume Intelligence API is running"}
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "service": "TalentForge AI",
+        "semantic_enabled": False
+    }
+
 
 
 @app.post("/analyze")
@@ -170,7 +179,7 @@ def ats_match(request: ATSMatchRequest):
     # RECLASSIFY USING ADJUSTED SCORE
     # -------------------------------
 
-    from app.services.skill_gap_analyzer import classify_application_readiness
+    from backend.app.services.skill_gap_analyzer import classify_application_readiness
 
     application_status = classify_application_readiness(adjusted_score)
 

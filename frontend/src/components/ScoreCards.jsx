@@ -26,7 +26,7 @@ function ScoreCards({ result }) {
   return (
     <div className="grid md:grid-cols-3 gap-8">
       {/* FINAL SCORE */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500/30 rounded-2xl p-8 text-center shadow-lg hover:border-blue-500/50 transition">
+      <div className="bg-linear-to-br from-gray-900 to-gray-800 border border-blue-500/30 rounded-2xl p-8 text-center shadow-lg hover:border-blue-500/50 transition">
         <p className="text-slate-400 text-sm tracking-wide">FINAL ATS SCORE</p>
         <p className={`text-6xl font-bold mt-4 ${getScoreColor(finalScore)}`}>
           {finalScore}%
@@ -34,7 +34,7 @@ function ScoreCards({ result }) {
       </div>
 
       {/* SHORTLIST */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-8 text-center shadow-lg hover:border-purple-500/50 transition">
+      <div className="bg-linear-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-8 text-center shadow-lg hover:border-purple-500/50 transition">
         <p className="text-slate-400 text-sm tracking-wide">
           SHORTLIST PROBABILITY
         </p>
@@ -51,7 +51,7 @@ function ScoreCards({ result }) {
       </div>
 
       {/* STATUS */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-green-500/30 rounded-2xl p-8 text-center shadow-lg hover:border-green-500/50 transition">
+      <div className="bg-linear-to-br from-gray-900 to-gray-800 border border-green-500/30 rounded-2xl p-8 text-center shadow-lg hover:border-green-500/50 transition">
         <p className="text-slate-400 text-sm tracking-wide">
           APPLICATION STATUS
         </p>

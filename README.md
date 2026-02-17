@@ -136,7 +136,7 @@ This project is for educational and portfolio purposes.
 
 ## 👤 Author
 
-Yashasvi Shukla
+Yashasvi Shukla (YASHASVI SHUKLA)
 
 M.Tech (Computer Science)
 Full-Stack & AI-focused Developer
