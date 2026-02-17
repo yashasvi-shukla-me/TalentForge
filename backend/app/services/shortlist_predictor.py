@@ -7,22 +7,18 @@ def predict_shortlist_probability(
     critical_missing: list
 ) -> dict:
 
-    # Base probability from final score
-    probability = final_score * 0.75
+    # Logistic curve for more realistic behavior
+    probability = 100 / (1 + math.exp(-0.05 * (final_score - 55)))
 
-    # Boost if semantic similarity is strong
-    if semantic_similarity > 0.5:
-        probability += 10
-    elif semantic_similarity > 0.3:
-        probability += 5
 
-    # Penalize if critical skills missing
+    # Semantic boost (lightweight)
+    probability += semantic_similarity * 10
+
     if critical_missing:
         probability -= 15
 
     probability = max(min(round(probability, 2), 95), 5)
 
-    # Confidence estimation
     if semantic_similarity > 0.6:
         confidence = "High"
     elif semantic_similarity > 0.3:

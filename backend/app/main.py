@@ -21,7 +21,7 @@ from backend.app.services.experience_analyzer import (
     extract_resume_experience
 )
 from backend.app.services.shortlist_predictor import predict_shortlist_probability
-from backend.app.services.shortlist_predictor import predict_shortlist_probability
+
 
 
 class ResumeRequest(BaseModel):
@@ -135,10 +135,15 @@ def ats_match(request: ATSMatchRequest):
         seniority_penalty = 8
 
     experience_penalty = 0
-    if required_years and resume_years:
+    
+    if required_years:
+        if resume_years is None:
+            resume_years = 0
+
         if resume_years < required_years:
             gap = required_years - resume_years
-            experience_penalty = gap * 5  # 5% per year gap
+            experience_penalty = gap * 5
+
 
     total_penalty = experience_penalty + seniority_penalty
 
@@ -156,23 +161,15 @@ def ats_match(request: ATSMatchRequest):
     # -------------------------------
 
     base_skill_score = analysis["ats_score"]
-    semantic_score = semantic_similarity * 100
 
-    hybrid_score = round(
-        0.8 * base_skill_score +
-        0.2 * semantic_score,
-        2
+    hybrid_score = min(
+        100,
+        base_skill_score + semantic_similarity * 10
     )
+    hybrid_score = round(hybrid_score, 2)
 
-    # Boost if no missing skills
-    if (
-        not analysis["critical_missing"] and
-        not analysis["optional_missing"]
-    ):
-        hybrid_score = max(hybrid_score, base_skill_score)
+    adjusted_score = round(max(hybrid_score - total_penalty, 0), 2)
 
-
-    adjusted_score = max(hybrid_score - total_penalty, 0)
 
 
     # -------------------------------
