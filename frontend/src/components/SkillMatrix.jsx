@@ -1,67 +1,90 @@
-function SkillMatrix({ analysis }) {
-  if (!analysis) return null;
+function SkillMatrix({ result }) {
+  const matched = result.analysis.matched_skills || {};
+  const missing = result.analysis.missing_skills || {};
 
-  const matched = analysis.matched_skills || {};
-  const missing = analysis.missing_skills || {};
-
-  const categories = Array.from(
-    new Set([...Object.keys(matched), ...Object.keys(missing)]),
-  );
-
-  if (categories.length === 0) {
-    return (
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 text-center text-slate-400">
-        No skill comparison data available.
-      </div>
-    );
-  }
+  const hasMatched = Object.keys(matched).length > 0;
+  const hasMissing = Object.keys(missing).length > 0;
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
-      <h2 className="text-lg text-slate-300 font-semibold mb-6">
-        Skill Alignment Matrix
-      </h2>
+    <div className="bg-[#111827] border border-gray-800 rounded-2xl p-8 space-y-10">
+      <h3 className="text-xl font-semibold">Skill Alignment</h3>
 
-      <div className="space-y-8">
-        {categories.map((category) => {
-          const matchedSkills = matched[category] || [];
-          const missingSkills = missing[category] || [];
+      {/* MATCHED SECTION */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <p className="text-green-400 font-medium">Matched Skills</p>
+          {hasMatched && (
+            <span className="text-xs text-gray-500">
+              {Object.values(matched).flat().length} total
+            </span>
+          )}
+        </div>
 
-          return (
-            <div key={category}>
-              <p className="text-sm text-slate-400 mb-3 capitalize tracking-wide">
+        {!hasMatched ? (
+          <p className="text-gray-500 text-sm">No matched skills detected.</p>
+        ) : (
+          Object.entries(matched).map(([category, skills]) => (
+            <div
+              key={category}
+              className="bg-[#0F172A] border border-gray-700 rounded-xl p-4 space-y-3"
+            >
+              <div className="flex justify-between items-center">
+                <p className="capitalize text-gray-300 text-sm font-medium">
+                  {category.replace("_", " ")}
+                </p>
+                <span className="text-xs text-gray-500">
+                  {skills.length} skills
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-sm"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* MISSING SECTION */}
+      {hasMissing && (
+        <div className="space-y-6 pt-6 border-t border-gray-800">
+          <div className="flex items-center justify-between">
+            <p className="text-red-400 font-medium">Missing Skills</p>
+            <span className="text-xs text-gray-500">
+              {Object.values(missing).flat().length} total
+            </span>
+          </div>
+
+          {Object.entries(missing).map(([category, skills]) => (
+            <div
+              key={category}
+              className="bg-[#0F172A] border border-gray-700 rounded-xl p-4 space-y-3"
+            >
+              <p className="capitalize text-gray-300 text-sm font-medium">
                 {category.replace("_", " ")}
               </p>
 
-              <div className="flex flex-wrap gap-3">
-                {matchedSkills.map((skill, i) => (
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill) => (
                   <span
-                    key={`m-${i}`}
-                    className="px-3 py-1 text-sm bg-green-500/10 border border-green-500/40 rounded-lg text-green-400"
+                    key={skill}
+                    className="px-3 py-1 bg-red-500/10 text-red-400 rounded-full text-sm"
                   >
                     {skill}
                   </span>
                 ))}
-
-                {missingSkills.map((skill, i) => (
-                  <span
-                    key={`x-${i}`}
-                    className="px-3 py-1 text-sm bg-red-500/10 border border-red-500/40 rounded-lg text-red-400"
-                  >
-                    {skill}
-                  </span>
-                ))}
-
-                {matchedSkills.length === 0 && missingSkills.length === 0 && (
-                  <span className="text-slate-500 text-sm">
-                    No relevant skills detected.
-                  </span>
-                )}
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
