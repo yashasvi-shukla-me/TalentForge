@@ -1,5 +1,5 @@
 from typing import Dict, List
-from app.services.skill_gap_analyzer import ROLE_BASED_WEIGHTS
+from backend.app.services.skill_gap_analyzer import ROLE_BASED_WEIGHTS
 
 
 def infer_job_role(jd_skills: Dict[str, List[str]]) -> str:
