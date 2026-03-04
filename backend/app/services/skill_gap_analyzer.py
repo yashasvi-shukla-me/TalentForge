@@ -4,43 +4,108 @@ from typing import Dict, List, Set
 ENABLE_SEMANTIC_MATCHING = False
 
 if ENABLE_SEMANTIC_MATCHING:
-    from backend.app.services.semantic_matcher import SemanticMatcher
+    # Import kept local to avoid loading heavy models on constrained hosts
+    from app.services.semantic_matcher import SemanticMatcher  # type: ignore
 
 
+# Role weights are expressed in terms of the categories emitted by SKILL_VOCABULARY
+# in skill_extractor.py (programming_languages, frontend_frameworks, backend_frameworks,
+# ml_ai, databases, cloud_platforms, devops_tools, etc.).
 ROLE_BASED_WEIGHTS = {
+    "backend_engineer": {
+        "programming_languages": 4.0,
+        "backend_frameworks": 3.5,
+        "databases": 3.0,
+        "cloud_platforms": 2.5,
+        "devops_tools": 2.0,
+        "frontend_frameworks": 1.5,
+    },
+    "frontend_engineer": {
+        "programming_languages": 3.5,
+        "frontend_frameworks": 4.0,
+        "backend_frameworks": 2.0,
+        "databases": 1.5,
+        "cloud_platforms": 1.5,
+    },
     "ml_engineer": {
         "programming_languages": 3.0,
         "ml_ai": 4.0,
-        "databases": 2.0,
-        "cloud_devops": 2.0
+        "databases": 2.5,
+        "cloud_platforms": 2.0,
     },
-    "backend_engineer": {
+    "fullstack_engineer": {
         "programming_languages": 4.0,
-        "ml_ai": 1.5,
+        "backend_frameworks": 3.0,
+        "frontend_frameworks": 3.0,
+        "databases": 2.5,
+        "cloud_platforms": 2.0,
+        "devops_tools": 2.0,
+    },
+    "data_engineer": {
+        "programming_languages": 3.0,
+        "databases": 4.0,
+        "ml_ai": 2.0,
+        "cloud_platforms": 3.0,
+        "devops_tools": 2.0,
+    },
+    "devops_engineer": {
+        "programming_languages": 2.5,
+        "devops_tools": 4.0,
+        "cloud_platforms": 4.0,
+        "architecture": 2.0,
+    },
+    "cloud_engineer": {
+        "programming_languages": 2.5,
+        "cloud_platforms": 4.0,
+        "devops_tools": 3.0,
+        "architecture": 2.5,
+    },
+    "software_engineer": {
+        "programming_languages": 4.0,
+        "backend_frameworks": 3.0,
+        "frontend_frameworks": 3.0,
         "databases": 3.0,
-        "cloud_devops": 3.0
+        "cloud_platforms": 2.0,
     },
-    "frontend_engineer": {
-        "programming_languages": 4.0,
-        "ml_ai": 1.0,
-        "databases": 1.5,
-        "cloud_devops": 1.5
-    }
 }
 
 
 CRITICAL_SKILLS = {
     "backend_engineer": {
         "programming_languages": ["java", "python", "go"],
-        "databases": ["sql", "postgresql"]
+        "backend_frameworks": ["fastapi", "django", "flask", "express"],
+        "databases": ["sql", "postgresql"],
     },
     "ml_engineer": {
         "programming_languages": ["python"],
-        "ml_ai": ["machine learning", "deep learning"]
+        "ml_ai": ["machine learning", "deep learning", "pytorch", "tensorflow"],
     },
     "frontend_engineer": {
-        "programming_languages": ["javascript", "typescript"]
-    }
+        "programming_languages": ["javascript", "typescript"],
+        "frontend_frameworks": ["react", "nextjs", "vue", "angular"],
+    },
+    "fullstack_engineer": {
+        "programming_languages": ["javascript", "typescript", "python"],
+        "frontend_frameworks": ["react", "nextjs"],
+        "backend_frameworks": ["fastapi", "express"],
+        "databases": ["sql", "postgresql"],
+    },
+    "data_engineer": {
+        "programming_languages": ["python"],
+        "databases": ["sql", "postgresql", "mysql"],
+        "cloud_platforms": ["aws", "gcp", "azure"],
+    },
+    "devops_engineer": {
+        "devops_tools": ["docker", "kubernetes", "ci/cd", "jenkins"],
+        "cloud_platforms": ["aws", "gcp", "azure"],
+    },
+    "cloud_engineer": {
+        "cloud_platforms": ["aws", "gcp", "azure"],
+        "architecture": ["microservices", "REST API"],
+    },
+    "software_engineer": {
+        "programming_languages": ["java", "python", "javascript", "typescript"],
+    },
 }
 
 

@@ -1,5 +1,5 @@
 from typing import Dict, List
-from backend.app.services.skill_gap_analyzer import ROLE_BASED_WEIGHTS
+from app.services.skill_gap_analyzer import ROLE_BASED_WEIGHTS
 
 
 def infer_job_role(jd_skills: Dict[str, List[str]]) -> str:
@@ -8,11 +8,8 @@ def infer_job_role(jd_skills: Dict[str, List[str]]) -> str:
     using weighted category scoring.
     """
 
-    role_scores = {
-        "backend_engineer": 0.0,
-        "frontend_engineer": 0.0,
-        "ml_engineer": 0.0
-    }
+    # Initialize scores dynamically from ROLE_BASED_WEIGHTS so new roles stay in sync.
+    role_scores = {role: 0.0 for role in ROLE_BASED_WEIGHTS.keys()}
 
     for category, skills in jd_skills.items():
         for role, weights in ROLE_BASED_WEIGHTS.items():

@@ -1,126 +1,201 @@
-# 🤖 TalentForge - AI Resume Intelligence Platform
+# 🤖 TalentForge – AI Resume Intelligence Platform
 
-TalentForge is a full-stack AI-powered Resume Intelligence and ATS-style analysis platform.  
-It evaluates how well a resume matches a given job description, computes a role-aware ATS score, and provides actionable feedback to improve job fit.
+TalentForge is a full‑stack AI-powered resume intelligence and ATS-style analysis platform.  
+It evaluates how well a resume matches a given job description, computes a role‑aware ATS score, and provides concrete, human‑readable feedback to improve job fit.
 
-The system is designed with real-world constraints in mind, including explainability, scalability, and graceful degradation on low-memory infrastructure.
-
----
-
-## 🚀 Live Demo
-
-- **Frontend (Vercel):** https://talentforge-one.vercel.app/
-- **Backend (Render):** https://ai-resume-intelligence-1kzv.onrender.com
+The system is designed around **explainability**, **realistic deployment constraints** (free tiers, cold starts, limited memory), and a clean separation between frontend and backend.
 
 ---
 
-## ✨ Key Features
+## 🚀 Live demo
 
-- 📄 **Resume PDF Upload**
-  - Upload resumes in PDF format
-  - Server-side text extraction and parsing
+- **Frontend (Vercel)**: `https://talentforge-one.vercel.app/`
+- **Backend API (Render)**: `https://ai-resume-intelligence-1kzv.onrender.com`
 
-- 🧠 **Skill Extraction & Categorization**
-  - Programming Languages
-  - Databases
-  - ML / AI
-  - Cloud & DevOps
-
-- 📊 **ATS-Style Resume Scoring**
-  - Role-based weighted scoring
-  - Backend Engineer / ML Engineer / Frontend Engineer roles
-  - Transparent and explainable scoring logic
-
-- 🔍 **Skill Gap Analysis**
-  - Matched skills
-  - Missing skills
-  - Category-wise evaluation
-
-- 📝 **Actionable Feedback**
-  - Clear recommendations on what skills to add or highlight
-  - Human-readable feedback instead of black-box scores
-
-- ⚙️ **Production-Ready Architecture**
-  - Clean API separation
-  - Frontend-backend decoupling
-  - Graceful handling of infrastructure constraints
+> The backend runs on Render’s free tier. If the service has been idle, the **first request may take a few seconds** while the server cold‑starts. Subsequent requests are much faster.
 
 ---
 
-## 🧩 Tech Stack
+## Key capabilities
+
+- **Resume PDF upload**
+  - Upload a PDF resume.
+  - Backend extracts text using `pdfplumber` and performs cleaning and sectioning.
+
+- **Job description aware analysis**
+  - Paste any real job description (or use built‑in templates per role on the frontend).
+  - System aligns resume skills and experience against that specific JD, not a generic profile.
+
+- **ATS-style scoring**
+  - Role‑aware ATS score on a 0–100 scale.
+  - Combines:
+    - Explicit skill match.
+    - Experience and seniority alignment.
+    - Optional semantic document similarity.
+
+- **Skill gap and match insights**
+  - Detects:
+    - Matched skills.
+    - Missing and critical‑missing skills.
+    - Category‑wise coverage (backend, frontend, data, ML, cloud, DevOps, etc.).
+
+- **Shortlist probability & narrative feedback**
+  - Predicts a shortlist probability band.
+  - Generates human‑readable feedback and an improvement plan, not just a raw number.
+
+- **Modern UX**
+  - Dedicated landing page with a clear CTA (“Analyze your resume”).
+  - Guided two‑step flow:
+    - Step 1: Provide resume + JD + target role.
+    - Step 2: View ATS score, skill gaps, and suggestions.
+
+---
+
+## 🧩 Tech stack
 
 ### Frontend
 
-- React
-- Vite
-- Tailwind CSS
-- Deployed on Vercel
+- React (Vite)
+- Tailwind‑style utility classes
+- Deployed on **Vercel**
+
+Key files:
+
+- `frontend/src/App.jsx` – landing page, analyzer flow, storytelling header.
+- `frontend/src/api/atsApi.js` – API integration with the FastAPI backend.
+- `frontend/src/components/*` – visualization components:
+  - `ScoreCards`, `SkillMatrix`, `CategoryStrength`, `SimulationPanel`, `SeniorityPanel`, `RadialProgress`.
 
 ### Backend
 
-- FastAPI
-- Python
-- pdfplumber (PDF parsing)
-- Pydantic (request/response validation)
-- Deployed on Render
+- Python 3.12
+- FastAPI + Uvicorn
+- pdfplumber / pdfminer.six – PDF parsing
+- Pydantic v2 – request/response models
+- Sentence‑Transformers / Transformers (optional semantic similarity)
+- Deployed on **Render** as a Web Service
+
+Key modules:
+
+- `backend/app/main.py` – FastAPI app, routes, CORS.
+- `backend/app/services/*` – ATS engine, experience analysis, semantic similarity, feedback.
+- `backend/app/utils/text_cleaning.py` – text cleaning / normalization.
 
 ---
 
-## 📐 ATS Scoring Logic (High-Level)
+## API overview
 
-1. Extract skills from:
-   - Resume
-   - Job Description
-2. Categorize skills into predefined domains
-3. Apply **role-based weights**:
-   - Backend Engineer
-   - ML Engineer
-   - Frontend Engineer
-4. Compute weighted match percentage
-5. Generate explainable feedback based on missing skills
+Base URL (Render): `https://ai-resume-intelligence-1kzv.onrender.com`
 
-This approach mirrors how real ATS systems prioritize skills differently based on role.
+### `GET /`
+
+Health‑style root endpoint.
+
+**Response**
+
+```json
+{ "message": "AI Resume Intelligence API is running" }
+```
+
+### `GET /health`
+
+Lightweight health check used by uptime monitoring and the frontend.
+
+### `POST /upload-resume`
+
+Accepts a PDF resume and returns:
+
+- Cleaned text.
+- Detected sections.
+- Extracted skills by category.
+
+### `POST /ats-match`
+
+Main analysis endpoint.
+
+**Request body**
+
+```json
+{
+  "resume_text": "string",
+  "job_description": "string",
+  "job_role": "backend_engineer | frontend_engineer | fullstack_engineer | ml_engineer | data_engineer | devops_engineer | cloud_engineer | software_engineer | null"
+}
+```
+
+**Response (high‑level)**
+
+- `resume_skills` / `job_description_skills`
+- `analysis`
+  - ATS scores (base + hybrid + adjusted).
+  - Skill gap breakdown.
+  - Experience / seniority penalties.
+  - `application_status` (Perfect / Strong / Moderate / Low / Very Weak Match).
+- `shortlist_prediction`
+  - Probability and confidence band.
+- `feedback`
+  - Narrative guidance and improvement plan.
 
 ---
 
-## 🧠 Semantic Matching (Design Note)
+## ATS scoring and reasoning
 
-The system includes optional **semantic skill matching** using transformer-based embeddings.
+High‑level flow:
 
-- Semantic matching is **feature-flagged**
-- Disabled by default on low-memory deployments
-- Can be enabled on higher-memory infrastructure without code changes
+1. **Extract skills**
+   - From resume and JD using a curated skill vocabulary and normalization (e.g., mapping `React.js`, `ReactJS` → `react`).
+2. **Categorize and weight**
+   - Skills mapped into categories (programming languages, frontend frameworks, backend frameworks, ML/AI, databases, cloud, DevOps, etc.).
+   - Role‑specific weight tables (`ROLE_BASED_WEIGHTS`) prioritize relevant categories (e.g., backend vs. ML).
+3. **Compute ATS score**
+   - Category coverage × role weights → base ATS score.
+4. **Experience and seniority adjustment**
+   - Extract required experience from the JD and estimated years from the resume.
+   - Classify JD and resume seniority (junior / mid / senior).
+   - Apply penalties for gaps in years or seniority mismatch.
+5. **Semantic similarity (optional)**
+   - Compute transformer‑based similarity between resume and JD text.
+   - Blend with skill‑based score to form a hybrid score.
+6. **Application readiness classification**
+   - Map adjusted score to:
+     - Perfect Match
+     - Strong Match
+     - Moderate Match
+     - Low Match
+     - Very Weak Match
+   - Each label includes a recommended action.
 
-This design allows the system to:
-
-- Remain stable on free-tier infrastructure
-- Scale intelligently when resources allow
+The frontend mirrors this logic with clear visual cues and consistent color mapping (green / yellow / amber / red) so the story is understandable at a glance.
 
 ---
 
-## 🛡️ Graceful Degradation Strategy
+## Semantic matching and graceful degradation
 
-On constrained infrastructure:
+The backend is written to run on both **free‑tier** and **higher‑memory** infrastructure:
 
-- Exact skill matching is used
-- ATS scoring remains correct and explainable
-- No silent failures or incorrect scores
-
-This reflects real-world engineering tradeoffs rather than toy implementations.
+- Semantic (embedding‑based) similarity is **optional** and can be disabled when memory is tight.
+- Even without semantic matching:
+  - Exact skill matching remains correct and explainable.
+  - ATS scores are still coherent and deterministic.
+- This avoids silent failures or misleading scores when running on small machines.
 
 ---
 
-## 🧪 Local Development
+## Local development
 
 ### Backend
 
 ```bash
 cd backend
 python -m venv resume_env
-source resume_env/bin/activate
+source resume_env/bin/activate  # Windows: resume_env\Scripts\activate
 pip install -r requirements.txt
+
+# Run FastAPI locally
 uvicorn app.main:app --reload
 ```
+
+The API will be available at `http://127.0.0.1:8000`.
 
 ### Frontend
 
@@ -130,25 +205,57 @@ npm install
 npm run dev
 ```
 
-## 📄 License
+The UI runs on `http://localhost:5173` and is configured (via CORS) to talk to:
 
-This project is for educational and portfolio purposes.
+- `http://127.0.0.1:8000` in local development (when configured accordingly).
+- The Render backend in production.
 
-## 👤 Author
+---
 
-Yashasvi Shukla (YASHASVI SHUKLA)
+## Deployment notes
 
-M.Tech (Computer Science)
-Full-Stack & AI-focused Developer
+### Render (backend)
 
-## ⭐ Why This Project Matters
+- Service type: **Web Service**.
+- Recommended start command:
 
-TalentForge is not a tutorial project.
-It demonstrates:
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
 
-- End-to-end system design
-- Real deployment constraints
-- Explainable AI principles
-- Production-grade decision making
+- Health endpoints:
+  - `/` and `/health` both return lightweight JSON and are safe for uptime monitors.
+- Free tier behaviour:
+  - Service **sleeps when idle** and can take ~30–90 seconds to wake on the first request.
+  - TalentForge’s frontend surfaces a friendly “warming up” message to set user expectations.
 
-This makes it suitable for interviews and real-world discussions, not just demos.
+### Vercel (frontend)
+
+- Framework preset: **Vite + React**.
+- Optional environment variable:
+  - `VITE_API_BASE_URL` – override default backend base URL if needed.
+
+---
+
+## Why this project matters ⭐
+
+TalentForge is built as a **portfolio‑grade**, discussion‑ready project rather than a toy tutorial:
+
+- Demonstrates end‑to‑end system design (frontend, API, scoring engine, feedback).
+- Handles real‑world deployment constraints (free tiers, cold starts, memory).
+- Emphasizes **explainable AI**, not just high scores.
+- Provides a strong base to discuss trade‑offs in interviews and technical conversations.
+
+---
+
+## Author
+
+**Yashasvi Shukla**  
+M.Tech (Computer Science) – Full‑Stack & AI‑focused Developer
+
+---
+
+## License
+
+This project is intended for educational and portfolio use.  
+If you are interested in using it commercially, please contact the author.

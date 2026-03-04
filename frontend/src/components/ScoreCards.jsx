@@ -24,12 +24,15 @@ function ScoreCards({ result }) {
   const recommendation =
     typeof statusRaw === "object" ? statusRaw.recommendation : null;
 
+  // Match backend labels: Perfect Match, Strong Match, Moderate Match, Low Match, Very Weak Match
   const statusColor =
-    status === "High Match"
+    status === "Perfect Match" || status === "Strong Match"
       ? "text-green-400"
       : status === "Moderate Match"
         ? "text-yellow-400"
-        : "text-red-400";
+        : status === "Low Match"
+          ? "text-amber-400"
+          : "text-red-400";
 
   return (
     <div className="grid md:grid-cols-3 gap-6">
